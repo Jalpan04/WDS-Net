@@ -29,3 +29,8 @@ env/
 # Custom Datasets
 digit_data/
 charater_data/
+*.zip
+
+# AI Prompts/Notes
+gemini.md
+agent.md
