@@ -58,24 +58,62 @@ def plot_confusion_matrix(cm, num_classes, save_path="confusion_matrix.png"):
 
 def plot_roc_curves(fpr_dict, tpr_dict, roc_auc_dict, num_classes, save_path="roc_curves.png"):
     """
-    Plots ROC curves for multi-class classification.
+    Plots ROC curves for multi-class classification with publication-quality styling.
     """
-    plt.figure(figsize=(10, 8))
-    
-    # Plot average or individual curves (simplified for clarity if many classes)
-    for i in range(min(num_classes, 10)): # Plot up to 10 classes to avoid clutter
-        if i in fpr_dict and i in tpr_dict:
-            plt.plot(fpr_dict[i], tpr_dict[i], lw=2, label=f'Class {i} (AUC = {roc_auc_dict[i]:.2f})')
+    # 1. Use a modern, light grid style if available
+    try:
+        plt.style.use('seaborn-v0_8-whitegrid')
+    except Exception:
+        try:
+            plt.style.use('seaborn-whitegrid')
+        except Exception:
+            pass # Fallback to default styling
 
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic (ROC)')
-    plt.legend(loc="lower right")
-    plt.savefig(save_path)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # 2. Setup inset zoom bounding box [x, y, width, height]
+    axins = ax.inset_axes([0.4, 0.2, 0.45, 0.45])
+    
+    # 3. Setup sequential colormap for high-class scaling
+    cmap = plt.get_cmap('plasma')
+    colors = [cmap(i) for i in np.linspace(0, 0.9, num_classes)] # 0.9 prevents getting too close to invisible yellow
+
+    # Plot all classes 
+    for i in range(num_classes):
+        if i in fpr_dict and i in tpr_dict:
+            # Main plot curve
+            ax.plot(fpr_dict[i], tpr_dict[i], color=colors[i], lw=1.5, alpha=0.7, 
+                     label=f'Class {i} (AUC = {roc_auc_dict[i]:.4f})')
+            # Inset plot curve
+            axins.plot(fpr_dict[i], tpr_dict[i], color=colors[i], lw=1.5, alpha=0.7)
+
+    # Diagonal "Chance" Line
+    ax.plot([0, 1], [0, 1], color='gray', lw=1.5, linestyle='--', alpha=0.5)
+    axins.plot([0, 1], [0, 1], color='gray', lw=1.5, linestyle='--', alpha=0.5)
+
+    # Main plot configurations
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('False Positive Rate', fontsize=12, fontweight='bold')
+    ax.set_ylabel('True Positive Rate', fontsize=12, fontweight='bold')
+    ax.set_title('Receiver Operating Characteristic (ROC)', fontsize=15, fontweight='bold', pad=15)
+
+    # Inset configurations
+    axins.set_xlim(0.0, 0.1) # Zoom into [0, 0.1] for FPR
+    axins.set_ylim(0.9, 1.05) # Zoom into [0.9, 1.0] for TPR
+    axins.tick_params(labelsize=9)
+    ax.indicate_inset_zoom(axins, edgecolor="black")
+
+    # Legend configurations (Brought outside the main box)
+    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0., fontsize=10)
+
+    # Final rendering
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight') # High DPI for publication
     plt.close()
+    
+    # Reset style to default to avoid bleeding into other plots globally
+    plt.style.use('default')
 
 def save_checkpoint(model, optimizer, epoch, path="wds_net_checkpoint.pth"):
     """Saves the model state, optimizer state, and current epoch."""
