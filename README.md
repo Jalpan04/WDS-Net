@@ -39,26 +39,36 @@ Run the following command to install the required data processing and visualizat
 pip install numpy opencv-python scikit-learn matplotlib seaborn tqdm
 ```
 
-### 2. Dataset Preparation
+### 2. Detailed Dataset Preparation
 
-The `UniversalDataset` loader is designed to automatically infer classes from your directory structure. You can supply multiple root directories simultaneously (for example, combining characters and digits from different sources).
+WDS-Net is designed to seamlessly integrate with **any image dataset** without requiring manual code modifications. Follow these precise steps to prepare your custom data:
 
-**Expected Directory Structure**:
-Your data must be organized into separate folders for each class within a split directory:
+**Step A: Organize Your Directory Structure**
+Ensure your dataset is strictly organized into distinct `Train` and `Test` (or Validation) root folders. Inside these roots, create a subfolder for each unique class category. The framework automatically parses these subfolder names to generate the `class_to_idx` mappings.
+
 ```text
-your_dataset_path/
+my_custom_dataset/
 ├── Train/
-│   ├── class_A/
-│   │   ├── img1.png
-│   │   └── img2.png
-│   ├── class_B/
-│   └── class_C/
+│   ├── category_A/
+│   │   ├── img_001.jpg
+│   │   └── img_002.png
+│   ├── category_B/
+│   └── category_C/
 └── Test/
-    ├── class_A/
-    ├── class_B/
-    └── class_C/
+    ├── category_A/
+    ├── category_B/
+    └── category_C/
 ```
-*Note: The dataset script automatically handles image resizing (defaults to 28x28), grayscale conversion, noise reduction (Gaussian Blur), and pixel normalization.*
+
+**Step B: Understanding Automated Preprocessing**
+You do not need to manually resize, crop, or convert your raw images beforehand. The `UniversalDataset` loader handles the entire ingestion pipeline:
+1. **Resolution Standardization:** Automatically resizes all varying input images to a uniform `28x28` dimension.
+2. **Channel Reduction:** Converts standard RGB images to 1-channel Grayscale structures.
+3. **Denoising:** Applies a built-in Gaussian Blur to reduce high-frequency background noise.
+4. **Statistical Normalization:** Normalizes pixel intensity distributions using static mean and variance adjustments necessary for the *Global Path*.
+
+**Step C: Handling Multiple Data Sources**
+The framework supports combining disjoint datasets dynamically. If your training data comes from multiple locations, simply pass a list of directory paths to the training command. The model will union the classes seamlessly.
 
 ### 3. Executing the Training
 

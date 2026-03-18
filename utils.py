@@ -161,6 +161,16 @@ def save_model(model, path="wds_net_model.pth"):
     torch.save(model.state_dict(), path)
     print(f"Model saved to {path}")
 
+def save_text_as_image(text, filename, figsize=(10, 8), fontsize=12):
+    """Saves a raw text string as a simple graphical PNG image with a white background."""
+    plt.figure(figsize=figsize, facecolor='white')
+    plt.text(0.01, 0.98, text, fontsize=fontsize, color='black', fontfamily='monospace', 
+             verticalalignment='top', horizontalalignment='left')
+    plt.axis('off')
+    plt.tight_layout(pad=0)
+    plt.savefig(filename, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+
 def load_model(model, path="wds_net_model.pth", device='cpu'):
     model.load_state_dict(torch.load(path, map_location=device))
     model.to(device)
