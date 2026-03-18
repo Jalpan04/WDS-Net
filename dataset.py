@@ -6,14 +6,20 @@ import cv2
 from utils import extract_global_features
 
 class UniversalDataset(Dataset):
-    def __init__(self, data_dirs):
+    def __init__(self, data_dirs, class_to_idx=None):
         """
         Args:
             data_dirs: List of paths to dataset directories (Train or Test root)
+            class_to_idx: Optional pre-computed mapping of class names to integer indices 
+                          (vital for validation/test sets to match training set indices).
         """
         self.image_paths = []
         self.labels = []
-        self.class_to_idx = {}
+        
+        # If no mapping is provided, we establish a new one.
+        # If provided, we freeze it and only accept known classes.
+        self.class_to_idx = class_to_idx if class_to_idx is not None else {}
+        is_mapping_frozen = class_to_idx is not None
         
         for data_dir in data_dirs:
             if not os.path.exists(data_dir):
@@ -26,8 +32,13 @@ class UniversalDataset(Dataset):
                 if not os.path.isdir(class_dir):
                     continue
                 
-                # Assign universal class indices dynamically
+                # Assign universal class indices dynamically if not frozen
                 if class_name not in self.class_to_idx:
+                    if is_mapping_frozen:
+                        # Skip this class because the model was entirely untrained on it
+                        print(f"Warning: Class '{class_name}' not found in training set. Skipping.")
+                        continue
+                        
                     self.class_to_idx[class_name] = len(self.class_to_idx)
                     
                 for img_name in os.listdir(class_dir):

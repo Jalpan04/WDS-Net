@@ -29,7 +29,7 @@ def main():
     print("\nInitializing datasets...")
     
     train_dataset = UniversalDataset(args.train_dirs)
-    val_dataset = UniversalDataset(args.test_dirs)
+    val_dataset = UniversalDataset(args.test_dirs, class_to_idx=train_dataset.class_to_idx)
     
     num_classes = len(train_dataset.class_to_idx)
     print(f"Total Combined Classes Detected: {num_classes}")
