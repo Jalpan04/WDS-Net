@@ -60,12 +60,16 @@ def main():
     # Plot training loss graph
     plot_training_curves(train_losses, val_accuracies=None)
 
+    # Extract class names ordered by their index
+    class_names = [k for k, v in sorted(train_dataset.class_to_idx.items(), key=lambda item: item[1])]
+
     # 4. Evaluation Phase
     print("\nRunning final evaluation on validation set...")
     metrics = evaluate_model(
         model=model, 
         dataloader=val_loader, 
-        num_classes=num_classes, 
+        num_classes=num_classes,
+        class_names=class_names,
         device=args.device,
         save_plots=True
     )

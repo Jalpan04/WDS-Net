@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support, con
 from sklearn.preprocessing import label_binarize
 from utils import plot_confusion_matrix, plot_roc_curves
 
-def evaluate_model(model, dataloader, num_classes, device='cpu', save_plots=True):
+def evaluate_model(model, dataloader, num_classes, class_names=None, device='cpu', save_plots=True):
     """
     Runs the testing phase on unseen data and generates performance metrics.
     """
@@ -34,7 +34,7 @@ def evaluate_model(model, dataloader, num_classes, device='cpu', save_plots=True
     # Confusion Matrix
     cm = confusion_matrix(all_labels, all_preds)
     if save_plots:
-        plot_confusion_matrix(cm, num_classes)
+        plot_confusion_matrix(cm, class_names=class_names)
     
     # ROC and AUC Calculation
     labels_bin = label_binarize(all_labels, classes=range(num_classes))

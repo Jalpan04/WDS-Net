@@ -44,17 +44,40 @@ def plot_training_curves(train_losses, val_accuracies, save_path="training_curve
     plt.savefig(save_path)
     plt.close()
 
-def plot_confusion_matrix(cm, num_classes, save_path="confusion_matrix.png"):
+def plot_confusion_matrix(cm, class_names=None, save_path="confusion_matrix.png"):
     """
-    Plots the confusion matrix.
+    Plots the normalized confusion matrix with optional class names.
     """
-    plt.figure(figsize=(12, 10))
-    sns.heatmap(cm, annot=False, cmap='Blues', fmt='g')
-    plt.title('Confusion Matrix')
-    plt.ylabel('True Label')
-    plt.xlabel('Predicted Label')
-    plt.savefig(save_path)
+    plt.figure(figsize=(24, 18))
+    
+    # Increase base font size for the large canvas
+    sns.set_context("paper", font_scale=1.2)
+    
+    # Normalize by row (true labels) so values are percentages
+    cm_normalized = cm.astype('float') / (cm.sum(axis=1)[:, np.newaxis] + 1e-8)
+    cm_normalized = np.nan_to_num(cm_normalized)
+    
+    # Render Heatmap
+    sns.heatmap(cm_normalized, 
+                annot=False, 
+                cmap="GnBu", 
+                linewidths=0.05, 
+                linecolor='gray',
+                xticklabels=class_names if class_names is not None else "auto",
+                yticklabels=class_names if class_names is not None else "auto",
+                cbar_kws={'label': 'Proportion of Predictions'})
+                
+    plt.title('Normalized Confusion Matrix (WDS-Net)', fontsize=25, pad=20)
+    plt.ylabel('Actual Character', fontsize=18)
+    plt.xlabel('Predicted Character', fontsize=18)
+    
+    # Fix cutting off labels
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
     plt.close()
+    
+    # Reset context
+    sns.reset_orig()
 
 def plot_roc_curves(fpr_dict, tpr_dict, roc_auc_dict, num_classes, save_path="roc_curves.png"):
     """
