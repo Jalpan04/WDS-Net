@@ -166,3 +166,110 @@ def load_model(model, path="wds_net_model.pth", device='cpu'):
     model.to(device)
     print(f"Model loaded from {path}")
     return model
+
+def plot_pr_curves(prec_dict, rec_dict, pr_auc_dict, num_classes, save_path="pr_curves.png"):
+    """Plots Precision-Recall curves with publication-quality styling and a top-right zoom inset."""
+    try:
+        plt.style.use('seaborn-v0_8-whitegrid')
+    except Exception:
+        try:
+            plt.style.use('seaborn-whitegrid')
+        except Exception:
+            pass 
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Setup inset zoom bounding box [x, y, width, height] for the perfect top-right corner
+    axins = ax.inset_axes([0.15, 0.15, 0.45, 0.45])
+    
+    cmap = plt.get_cmap('plasma')
+    colors = [cmap(i) for i in np.linspace(0, 0.9, num_classes)] 
+
+    for i in range(num_classes):
+        if i in prec_dict and i in rec_dict:
+            # PR Curve plots Recall on X and Precision on Y
+            ax.plot(rec_dict[i], prec_dict[i], color=colors[i], lw=1.5, alpha=0.7, 
+                     label=f'Class {i} (AP = {pr_auc_dict[i]:.4f})')
+            axins.plot(rec_dict[i], prec_dict[i], color=colors[i], lw=1.5, alpha=0.7)
+
+    # Main plot configurations
+    ax.set_xlim([0.0, 1.05])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('Recall', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Precision', fontsize=12, fontweight='bold')
+    ax.set_title('Precision-Recall Curve (PR)', fontsize=15, fontweight='bold', pad=15)
+
+    # Inset configurations
+    axins.set_xlim(0.9, 1.0) # Zoom into [0.9, 1.0] for Recall
+    axins.set_ylim(0.9, 1.05) # Zoom into [0.9, 1.0] for Precision
+    axins.tick_params(labelsize=9)
+    ax.indicate_inset_zoom(axins, edgecolor="black")
+
+    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0., fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight') 
+    plt.close()
+    plt.style.use('default')
+
+def plot_class_f1_scores(class_f1, class_names=None, save_path="class_f1_scores.png"):
+    """Plots a horizontal bar chart of F1 scores by class, sorted from worst to best."""
+    if class_names is None:
+        class_names = [str(i) for i in range(len(class_f1))]
+        
+    # Sort by F1
+    sorted_indices = np.argsort(class_f1)
+    sorted_f1 = [class_f1[i] for i in sorted_indices]
+    sorted_names = [class_names[i] for i in sorted_indices]
+    
+    # Scale height dynamically based on number of classes
+    plt.figure(figsize=(12, max(8, len(class_names) * 0.35))) 
+    sns.set_context("paper", font_scale=1.2)
+    
+    # Use RdYlGn to highlight low (red) vs high (green) performance
+    palette = sns.color_palette("RdYlGn", len(class_names))
+    sns.barplot(x=sorted_f1, y=sorted_names, palette=palette, hue=sorted_names, legend=False)
+    
+    # Add a mean line
+    mean_f1 = sum(class_f1) / len(class_f1)
+    plt.axvline(x=mean_f1, color='gray', linestyle='--', linewidth=2, label=f'Mean F1 ({mean_f1:.3f})')
+    
+    plt.title('Class-Wise F1-Scores (Ranked)', fontsize=18, pad=15)
+    plt.xlabel('F1-Score', fontsize=14)
+    plt.ylabel('Character Class (Worst to Best)', fontsize=14)
+    plt.xlim(0, 1.05)
+    plt.legend(loc='lower right')
+    
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    sns.reset_orig()
+
+def plot_error_gallery(images, true_labels, pred_labels, class_names=None, save_path="error_gallery.png"):
+    """Plots a grid of misclassified images as a Gallery of Mistakes."""
+    n = len(images)
+    cols = 5
+    rows = int(np.ceil(n / cols))
+    if rows == 0: return 
+    
+    plt.figure(figsize=(3 * cols, 3.5 * rows))
+    for i in range(n):
+        plt.subplot(rows, cols, i+1)
+        img = np.squeeze(images[i])
+        
+        # Max-min un-normalization to ensure visibility since CNN standard deviations skew colors
+        img = (img - np.min(img)) / (np.max(img) - np.min(img) + 1e-8)
+        
+        plt.imshow(img, cmap='gray')
+        
+        t_label = class_names[true_labels[i]] if class_names else true_labels[i]
+        p_label = class_names[pred_labels[i]] if class_names else pred_labels[i]
+        
+        # Color the label red
+        plt.title(f"True: {t_label}\nPred: {p_label}", color='darkred', fontsize=11, fontweight='bold')
+        plt.axis('off')
+        
+    plt.suptitle("Gallery of Mistakes (Misclassifications)", fontsize=22, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
