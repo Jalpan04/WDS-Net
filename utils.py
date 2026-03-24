@@ -1,7 +1,24 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
+
+def _save_dual_format(filename_base):
+    """
+    Helper to save the current matplotlib figure to both PNG and TIFF 
+    in their respective subdirectories inside 'outputs/'.
+    """
+    os.makedirs(os.path.join("outputs", "png"), exist_ok=True)
+    os.makedirs(os.path.join("outputs", "tiff"), exist_ok=True)
+    
+    # Strip extension if provided to avoid .png.png or .png.tiff
+    base = os.path.splitext(os.path.basename(filename_base))[0]
+    
+    # Save PNG
+    plt.savefig(os.path.join("outputs", "png", f"{base}.png"), dpi=300, bbox_inches='tight')
+    # Save TIFF (with LZW compression for better publication quality/size)
+    plt.savefig(os.path.join("outputs", "tiff", f"{base}.tiff"), dpi=300, bbox_inches='tight', pil_kwargs={"compression": "tiff_lzw"})
 
 def extract_global_features(img_norm):
     """
@@ -42,7 +59,7 @@ def plot_training_curves(train_losses, val_accuracies, save_path="training_curve
 
     fig.tight_layout()
     plt.title("Training Loss and Validation Accuracy", fontsize=15, fontweight='bold', pad=15)
-    plt.savefig(save_path, dpi=300)
+    _save_dual_format(save_path)
     plt.close()
 
 def plot_confusion_matrix(cm, class_names=None, save_path="confusion_matrix.png"):
@@ -76,7 +93,7 @@ def plot_confusion_matrix(cm, class_names=None, save_path="confusion_matrix.png"
     plt.xlabel('Prediction', fontsize=18, fontweight='bold')
     
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    _save_dual_format(save_path)
     plt.close()
     
     sns.reset_orig()
@@ -134,7 +151,7 @@ def plot_roc_curves(fpr_dict, tpr_dict, roc_auc_dict, num_classes, save_path="ro
 
     # Final rendering
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight') # High DPI for publication
+    _save_dual_format(save_path) 
     plt.close()
     
     # Reset style to default to avoid bleeding into other plots globally
@@ -170,7 +187,7 @@ def save_text_as_image(text, filename, figsize=(10, 8), fontsize=12):
              verticalalignment='top', horizontalalignment='left')
     plt.axis('off')
     plt.tight_layout(pad=0)
-    plt.savefig(filename, dpi=300, bbox_inches='tight', facecolor='white')
+    _save_dual_format(filename)
     plt.close()
 
 def load_model(model, path="wds_net_model.pth", device='cpu'):
@@ -220,7 +237,7 @@ def plot_pr_curves(prec_dict, rec_dict, pr_auc_dict, num_classes, save_path="pr_
     ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0., fontsize=10)
 
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight') 
+    _save_dual_format(save_path) 
     plt.close()
     plt.style.use('default')
 
@@ -253,7 +270,7 @@ def plot_class_f1_scores(class_f1, class_names=None, save_path="class_f1_scores.
     plt.legend(loc='lower right')
     
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    _save_dual_format(save_path)
     plt.close()
     sns.reset_orig()
 
@@ -297,5 +314,5 @@ def plot_error_gallery(images, true_labels, pred_labels, class_names=None, save_
         
     plt.suptitle("Gallery of Mistakes (Misclassifications)", fontsize=22, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    _save_dual_format(save_path)
     plt.close()
