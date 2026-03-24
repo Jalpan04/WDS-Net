@@ -19,8 +19,8 @@ def main():
     parser.add_argument('--save_path', type=str, default='wds_net_model.pth', help='Path to save the final trained model weights')
     parser.add_argument('--checkpoint_path', type=str, default='wds_net_checkpoint.pth', help='Path to save/load intermediate training checkpoints')
     parser.add_argument('--resume', action='store_true', help='Resume training from the latest checkpoint if it exists')
-    parser.add_argument('--train_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\charater_data\Train'], help='List of paths to training directories')
-    parser.add_argument('--test_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\charater_data\Test'], help='List of paths to testing directories')
+    parser.add_argument('--train_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\urdu_data\Train'], help='List of paths to training directories')
+    parser.add_argument('--test_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\urdu_data\Test'], help='List of paths to testing directories')
     
     args = parser.parse_args()
     print(f"Running WDS-Net on device: {args.device}")

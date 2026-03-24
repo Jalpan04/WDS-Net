@@ -265,13 +265,27 @@ def plot_error_gallery(images, true_labels, pred_labels, class_names=None, save_
     plt.figure(figsize=(3 * cols, 3.5 * rows))
     for i in range(n):
         plt.subplot(rows, cols, i+1)
-        img = np.squeeze(images[i])
+        img = images[i]
+        
+        # Generalized handling for both 1-channel (Grayscale) and 3-channel (RGB) images
+        if img.shape[0] == 1:
+            img = np.squeeze(img, axis=0)
+            cmap = 'gray'
+        elif img.shape[0] == 3:
+            img = np.transpose(img, (1, 2, 0))
+            cmap = None
+        else:
+            img = np.squeeze(img)
+            cmap = 'gray'
         
         # Max-min un-normalization to ensure visibility since CNN standard deviations skew colors
         img = (img - np.min(img)) / (np.max(img) - np.min(img) + 1e-8)
         
-        plt.imshow(img, cmap='gray')
-        
+        if cmap:
+            plt.imshow(img, cmap=cmap)
+        else:
+            plt.imshow(img)
+            
         t_label = class_names[true_labels[i]] if class_names else true_labels[i]
         p_label = class_names[pred_labels[i]] if class_names else pred_labels[i]
         
