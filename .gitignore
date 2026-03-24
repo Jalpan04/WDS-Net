@@ -34,3 +34,10 @@ charater_data/
 # AI Prompts/Notes
 gemini.md
 agent.md
+
+# Documents
+*.docx
+
+# Generic Dataset Folders
+fashion/
+Dataset/

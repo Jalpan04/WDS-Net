@@ -11,6 +11,9 @@ def train_model(model, train_loader, val_loader=None, epochs=10, learning_rate=0
     Iterates through dataset mini-batches, performs forward passes, calculates loss, 
     and updates model weights. Can resume from a saved checkpoint.
     """
+    # Ensure model is on the correct device BEFORE initializing optimizer and loading checkpoints
+    model.to(device)
+    
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
@@ -20,8 +23,6 @@ def train_model(model, train_loader, val_loader=None, epochs=10, learning_rate=0
         model, optimizer, last_epoch = load_checkpoint(model, optimizer, path=resume_path, device=device)
         start_epoch = last_epoch + 1
         print(f"Resuming training from epoch {start_epoch+1}/{epochs}")
-    
-    model.to(device)
     
     train_losses = []
     

@@ -23,11 +23,12 @@ def plot_training_curves(train_losses, val_accuracies, save_path="training_curve
     epochs = range(1, len(train_losses) + 1)
     
     fig, ax1 = plt.subplots(figsize=(10, 6))
+    plt.grid(True, linestyle='--', alpha=0.6) # Enhanced readability
 
     color = 'tab:red'
-    ax1.set_xlabel('Epochs')
-    ax1.set_ylabel('Training Loss', color=color)
-    ax1.plot(epochs, train_losses, color=color, marker='o', label='Train Loss')
+    ax1.set_xlabel('Epochs', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Training Loss', color=color, fontsize=12, fontweight='bold')
+    ax1.plot(epochs, train_losses, color=color, marker='o', markersize=6, linewidth=2, label='Train Loss')
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()  
@@ -35,48 +36,49 @@ def plot_training_curves(train_losses, val_accuracies, save_path="training_curve
     
     # Handle case where validation wasn't done
     if val_accuracies:
-        ax2.set_ylabel('Validation Accuracy', color=color)
-        ax2.plot(epochs, val_accuracies, color=color, marker='s', label='Val Accuracy')
+        ax2.set_ylabel('Validation Accuracy', color=color, fontsize=12, fontweight='bold')
+        ax2.plot(epochs, val_accuracies, color=color, marker='s', markersize=6, linewidth=2, label='Val Accuracy')
         ax2.tick_params(axis='y', labelcolor=color)
 
     fig.tight_layout()
-    plt.title("Training Loss and Validation Accuracy")
-    plt.savefig(save_path)
+    plt.title("Training Loss and Validation Accuracy", fontsize=15, fontweight='bold', pad=15)
+    plt.savefig(save_path, dpi=300)
     plt.close()
 
 def plot_confusion_matrix(cm, class_names=None, save_path="confusion_matrix.png"):
     """
-    Plots the normalized confusion matrix with optional class names.
+    Plots the normalized confusion matrix with optional class names and integer annotations.
     """
-    plt.figure(figsize=(24, 18))
+    # Scale dimension to number of classes dynamically (at least 10x8)
+    fig_size = max(10, min(24, int(len(cm) * 0.6)))
+    plt.figure(figsize=(fig_size, fig_size * 0.75))
     
-    # Increase base font size for the large canvas
     sns.set_context("paper", font_scale=1.2)
     
-    # Normalize by row (true labels) so values are percentages
+    # Normalize by row for color grading
     cm_normalized = cm.astype('float') / (cm.sum(axis=1)[:, np.newaxis] + 1e-8)
     cm_normalized = np.nan_to_num(cm_normalized)
     
-    # Render Heatmap
+    # Render Heatmap utilizing `annot=cm` (raw counts) on top of the normalized color gradients
     sns.heatmap(cm_normalized, 
-                annot=False, 
-                cmap="GnBu", 
+                annot=cm, 
+                fmt="d", # Raw integers
+                cmap="Blues", 
                 linewidths=0.05, 
                 linecolor='gray',
                 xticklabels=class_names if class_names is not None else "auto",
                 yticklabels=class_names if class_names is not None else "auto",
+                annot_kws={"size": 10},
                 cbar_kws={'label': 'Proportion of Predictions'})
                 
-    plt.title('Normalized Confusion Matrix (WDS-Net)', fontsize=25, pad=20)
-    plt.ylabel('Actual Character', fontsize=18)
-    plt.xlabel('Predicted Character', fontsize=18)
+    plt.title('Confusion Matrix', fontsize=25, fontweight='bold', pad=20)
+    plt.ylabel('Actual', fontsize=18, fontweight='bold')
+    plt.xlabel('Prediction', fontsize=18, fontweight='bold')
     
-    # Fix cutting off labels
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300)
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    # Reset context
     sns.reset_orig()
 
 def plot_roc_curves(fpr_dict, tpr_dict, roc_auc_dict, num_classes, save_path="roc_curves.png"):
