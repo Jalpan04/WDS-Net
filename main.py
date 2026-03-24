@@ -19,10 +19,17 @@ def main():
     parser.add_argument('--save_path', type=str, default='wds_net_model.pth', help='Path to save the final trained model weights')
     parser.add_argument('--checkpoint_path', type=str, default='wds_net_checkpoint.pth', help='Path to save/load intermediate training checkpoints')
     parser.add_argument('--resume', action='store_true', help='Resume training from the latest checkpoint if it exists')
-    parser.add_argument('--train_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\urdu_data\Train'], help='List of paths to training directories')
-    parser.add_argument('--test_dirs', nargs='+', default=[r'd:\python projects\WSDNET+++\urdu_data\Test'], help='List of paths to testing directories')
+    parser.add_argument('--train_dirs', nargs='+', default=['Dataset/Train'], help='List of paths to training directories')
+    parser.add_argument('--test_dirs', nargs='+', default=['Dataset/Test'], help='List of paths to testing directories')
     
     args = parser.parse_args()
+    
+    # Validation logic to ensure the generalized folders exist
+    if not os.path.exists(args.train_dirs[0]) or not os.path.exists(args.test_dirs[0]):
+        print(f"Error: The dataset directories '{args.train_dirs[0]}' or '{args.test_dirs[0]}' do not exist!")
+        print("Please structure your dataset into 'Dataset/Train' and 'Dataset/Test' or pass valid paths using the --train_dirs and --test_dirs flags.")
+        return
+        
     print(f"Running WDS-Net on device: {args.device}")
 
     # 1. Dataset Initialization
