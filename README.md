@@ -1,6 +1,6 @@
 # WDS-Net: Multi-Path Feature Disentanglement Framework
 
-![GitHub top language](https://img.shields.io/github/languages/top/Jalpan04/WDS-Net) ![GitHub repo size](https://img.shields.io/github/repo-size/Jalpan04/WDS-Net) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org) [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white)](https://pytorch.org) ![GitHub repo size](https://img.shields.io/github/repo-size/Jalpan04/WDS-Net) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 WDS-Net is a general-purpose, PyTorch-based Deep Learning framework designed for image classification tasks. It leverages a unique multi-path architecture that simultaneously extracts Spatial (CNN), Structural (LSTM), and Global (Statistical) features from input images to improve predictive performance. 
 
